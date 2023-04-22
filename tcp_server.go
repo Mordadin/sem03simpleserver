@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"fmt"
 	"errors"
-        "github.com/Mordadin/is105sem03/mycrypt"
 	"github.com/Mordadin/funtemps/conv"
 )
 
@@ -52,14 +51,14 @@ func main() {
 						return
 					}
 
-					dekryptertMelding := mycrypt.Krypter([]rune(string(buf[:n])), mycrypt.ALF_SEM03, len(mycrypt.ALF_SEM03)-4)
+					dekryptertMelding := Krypter([]rune(string(buf[:n])), ALF_SEM03, len(ALF_SEM03)-4)
 					log.Println("Dekrypter melding: ", string(dekryptertMelding))
 
 					msgString := string(dekryptertMelding)
 
 					switch msgString {
 					case "ping":
-						kryptertMelding := mycrypt.Krypter([]rune("pong"), mycrypt.ALF_SEM03, -4)
+						kryptertMelding := Krypter([]rune("pong"), ALF_SEM03, -4)
 						log.Println("Kryptert melding: ", string(kryptertMelding))
 						_, err = c.Write([]byte(string(kryptertMelding)))
 
@@ -70,10 +69,10 @@ func main() {
 								log.Fatal(err)
 							}
 
-							kryptertMelding := mycrypt.Krypter([]rune(newString), mycrypt.ALF_SEM03, len(mycrypt.ALF_SEM03)-4)
+							kryptertMelding := Krypter([]rune(newString), ALF_SEM03, len(ALF_SEM03)-4)
 							_, err = conn.Write([]byte(string(kryptertMelding)))
 						} else {
-							kryptertMelding := mycrypt.Krypter([]rune(string(buf[:n])), mycrypt.ALF_SEM03, len(mycrypt.ALF_SEM03)-4)
+							kryptertMelding := Krypter([]rune(string(buf[:n])), ALF_SEM03, len(ALF_SEM03)-4)
 							_, err = c.Write([]byte(string(kryptertMelding)))
 
 						}
@@ -113,8 +112,34 @@ func CelsiusToFarenheitString(celsius string) (string, error) {
 	var fahrFloat float64
 	var err error
 	if celsiusFloat, err := strconv.ParseFloat(celsius, 64); err == nil {
-		fahrFloat = conv.CelcsiusToFarenheit(celsiusFloat)
+		fahrFloat = conv.CelsiusToFarenheit(celsiusFloat)
 	}
 	fahrString := fmt.Sprintf("%.1f", fahrFloat)
 	return fahrString, err
+}
+
+
+var ALF_SEM03 []rune = []rune("abcdefghijklmnopqrstuvwxyzæøå0123456789.,:; KSN") //ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ
+
+func Krypter(melding []rune, alphabet []rune, chiffer int) []rune {
+	kryptertMelding := make([]rune, len(melding))
+	for i := 0; i < len(melding); i++ {
+		indeks := sokIAlfabetet(melding[i], alphabet)
+		if indeks+chiffer >= len(alphabet) {
+			kryptertMelding[i] = alphabet[indeks+chiffer-len(alphabet)]
+		} else {
+			kryptertMelding[i] = alphabet[indeks+chiffer]
+		}
+
+	}
+	return kryptertMelding
+}
+
+func sokIAlfabetet(symbol rune, alfabet []rune) int {
+	for i := 0; i < len(alfabet); i++ {
+		if symbol == alfabet[i] {
+			return i
+		}
+	}
+	return -1
 }
